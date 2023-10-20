@@ -223,7 +223,7 @@ This is a BNF-ish description of the syntax:
 
 ## Serialization Example 
 
-**Note: there's a full serialization example under [Sim Unit Tests/SerializerDemo.cs](Sim Unit Tests/SerializerDemo.cs).**
+**Note: there's a full serialization example under [Sim Unit Tests/SerializerDemo.cs](Sim%20Unit%20Tests/SerializerDemo.cs).**
 
 Example **SimLang** serializer output for the sample game character from the introduction:
 
