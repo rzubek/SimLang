@@ -85,8 +85,8 @@ we refer to them in this document as _sim files_.
 
 - **Fast**
   - Parsing a sim file into data structures must be possible with a single pass over the character stream,
-    without backtracking or an overly complex state machines.
-  - Value serialized into a sim file can have only one canonical representation.
+    without backtracking or an overly complex state machine
+  - Value serialized into a sim file can have only one canonical representation
 
 - **Extensible**
   - Users can specify custom de/serializers for chosen data types
@@ -96,8 +96,7 @@ we refer to them in this document as _sim files_.
     language interpreter before it's parsed (we use it to embed Lisp expressions
     that get evaluated at parse time)
 
-**SimLang** design borrows a lot from S-expressions in Scheme and Lisp
-([example](http://people.csail.mit.edu/rivest/Sexp.txt)), but presents a
+**SimLang** design borrows a lot from S-expressions in Scheme and Lisp, but presents a
 more modern syntax that has special forms for maps vs arrays.
 
 
@@ -196,8 +195,8 @@ This is a BNF-ish description of the syntax:
     <dictionary>      :: "{" <ignored>* <entry>? (<ignored>+ <entry>)* <ignored>* "}"
     <entry>           :: <value> <ignored>+ <value>
     <ignored>         :: <comment> | <whitespace>
+    <macro>           :: "(" <macro-char>+ ")"
     <comment>         :: ";" and all subsequent characters up to <newline>
-    <macro>           :: "(" (<basic-char> except ")")+ ")"
 
     Primitive values:
 
@@ -217,11 +216,14 @@ This is a BNF-ish description of the syntax:
     <verbatim-char>   :: utf8 character except "\'" or control character
     <escaped-char>    :: "\n" | "\r"
     <basic-char>      :: utf8 character except "\\", "\"", or control character
+    <macro-char>      :: utf8 character except "("
     <whitespace>      :: white space characters and all control codes, i.e. 0x00 - 0x20
     <not-newline>     :: utf8 character except for newline characters
 ```
 
 ## Serialization Example 
+
+**Note: there's a full serialization example under [Sim Unit Tests/SerializerDemo.cs](Sim Unit Tests/SerializerDemo.cs).**
 
 Example **SimLang** serializer output for the sample game character from the introduction:
 
@@ -250,7 +252,7 @@ This example will naturally serialize from / deserialize into the following clas
 public class Person {
     public string id;
     public Info info;
-    public Dictionary<string, int> stats;
+    public Dictionary<Stat, int> stats;
     public List<Entry> inventory;
     public Dictionary<string, string> inuse;
 
@@ -302,9 +304,6 @@ Deserialization:
 
 
 ## Comparison with JSON
-
-The file [Sim Unit Tests/SerializerDemo.cs] contains an example of serializing 
-and deserializing a Player class.
 
 Here is the verbatim output as SimLang file (note that keys are alphabetically sorted by default):
 
@@ -399,6 +398,14 @@ Or schematically:
 
    Plain C# object  <-(deserialize)--   IR   <-(parse)--   Sim file
 ```
+
+The IR is an untyped collection of primitives. It allows only the following types: 
+**String, U/Int64, Double, ArrayList, Hashtable.** The primitive types are the
+widest available for each category, and data structures are untyped.
+
+Once the string is parsed into those types, the serializer's job is to
+convert hashtables to class instances (or dictionaries), untyped array lists to 
+strongly typed collections, and wide primitives into appropriate specific ones.
 
 This has several benefits:
 - The job of tokenizing/parsing/printing is different from the job of reflection-based serialization,
